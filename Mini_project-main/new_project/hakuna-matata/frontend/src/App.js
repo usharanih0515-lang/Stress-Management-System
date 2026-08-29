@@ -19,7 +19,7 @@ import './index.css';
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename={process.env.NODE_ENV === 'production' ? '/Stress-Management-System' : undefined}>
         <div className="App">
           <Routes>
             {/* Public Routes */}

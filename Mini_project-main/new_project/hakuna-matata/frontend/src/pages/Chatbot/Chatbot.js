@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Chatbot.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+
 const Chatbot = () => {
   const [messages, setMessages] = useState([
     { 
@@ -77,7 +79,7 @@ const Chatbot = () => {
       } else {
         // Try API call for other messages
         try {
-          const response = await axios.post('/api/chatbot/message', { message: input });
+          const response = await axios.post(`${API_BASE_URL}/api/chatbot/message`, { message: input });
           const botMessage = { text: response.data.reply, sender: 'bot' };
           setMessages((prev) => [...prev, botMessage]);
         } catch (apiError) {

@@ -1,4 +1,87 @@
 import React, { useState } from 'react';
+import { ArrowRight, Eye, EyeOff, Leaf, LockKeyhole, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import './Auth.css';
+
+const Login = () => {
+  const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    if (errors[name] || errors.submit) setErrors(prev => ({ ...prev, [name]: '', submit: '' }));
+  };
+
+  const validateForm = () => {
+    const nextErrors = {};
+    if (!formData.email) nextErrors.email = 'Email address is required.';
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email)) nextErrors.email = 'Enter a valid email address.';
+    if (!formData.password) nextErrors.password = 'Password is required.';
+    else if (formData.password.length < 6) nextErrors.password = 'Password must be at least 6 characters.';
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setIsLoading(true);
+    try {
+      const result = await login(formData.email, formData.password);
+      if (result.success) navigate('/dashboard');
+      else setErrors({ submit: result.error });
+    } catch (error) {
+      setErrors({ submit: 'Login failed. Please try again.' });
+    } finally { setIsLoading(false); }
+  };
+
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    try {
+      const result = await login('demo@example.com', 'password123');
+      if (result.success) navigate('/dashboard');
+      else setErrors({ submit: 'No demo account found. Please register first.' });
+    } catch (error) { setErrors({ submit: 'Demo login failed.' }); }
+    finally { setIsLoading(false); }
+  };
+
+  return (
+    <main className="auth-shell">
+      <section className="auth-story" aria-label="Wellness introduction">
+        <div className="story-orbit story-orbit-one" /><div className="story-orbit story-orbit-two" />
+        <div className="story-content">
+          <div className="brand-lockup brand-lockup-light"><span className="brand-mark"><Leaf size={19} /></span><span>Hakuna Matata</span></div>
+          <div className="story-copy"><p className="eyebrow">A calmer way forward</p><h1>Take a Moment for Yourself</h1><p>Manage stress, understand your wellbeing, and build healthier daily habits.</p></div>
+          <div className="wellness-visual" aria-hidden="true"><div className="visual-sun" /><div className="visual-breathing-ring visual-ring-back" /><div className="visual-breathing-ring visual-ring-front" /><div className="visual-person"><div className="person-head" /><div className="person-body" /><div className="person-leg person-leg-left" /><div className="person-leg person-leg-right" /></div><span className="visual-caption">Breathe in. Be present.</span></div>
+        </div>
+        <div className="story-footer"><span /> Small steps create lasting change</div>
+      </section>
+
+      <section className="auth-panel"><div className="auth-card">
+        <div className="brand-lockup brand-lockup-dark"><span className="brand-mark"><Leaf size={18} /></span><span>Hakuna Matata</span></div>
+        <div className="auth-heading"><p className="eyebrow">Your space to reset</p><h2>Welcome Back</h2><p>Sign in to continue your wellness journey.</p></div>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          {errors.submit && <div className="form-alert" role="alert">{errors.submit}</div>}
+          <div className="field-group"><label htmlFor="email">Email Address</label><div className={`input-wrap ${errors.email ? 'has-error' : ''}`}><Mail className="input-icon" size={19} /><input id="email" name="email" type="email" autoComplete="email" value={formData.email} onChange={handleChange} placeholder="Enter your email address" aria-invalid={Boolean(errors.email)} /></div>{errors.email && <p className="field-error">{errors.email}</p>}</div>
+          <div className="field-group"><label htmlFor="password">Password</label><div className={`input-wrap ${errors.password ? 'has-error' : ''}`}><LockKeyhole className="input-icon" size={19} /><input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={formData.password} onChange={handleChange} placeholder="Enter your password" aria-invalid={Boolean(errors.password)} /><button type="button" className="icon-button" onClick={() => setShowPassword(prev => !prev)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>{errors.password && <p className="field-error">{errors.password}</p>}</div>
+          <div className="form-options"><label className="check-label" htmlFor="rememberMe"><input id="rememberMe" name="rememberMe" type="checkbox" checked={formData.rememberMe} onChange={handleChange} /><span>Remember me</span></label><button type="button" className="text-link">Forgot password?</button></div>
+          <button type="submit" disabled={isLoading} className="primary-auth-button">{isLoading ? 'Signing in...' : 'Sign In'}{!isLoading && <ArrowRight size={18} />}</button>
+          <button type="button" onClick={handleDemoLogin} disabled={isLoading} className="secondary-auth-button">Try Demo Account</button>
+        </form>
+        <p className="auth-switch">Don't have an account? <button type="button" onClick={() => navigate('/register')} className="text-link">Create an account</button></p>
+      </div></section>
+    </main>
+  );
+};
+
+export default Login;
+/* import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext'; // Make sure this path is correct
 import './Auth.css';
@@ -215,4 +298,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Login; */

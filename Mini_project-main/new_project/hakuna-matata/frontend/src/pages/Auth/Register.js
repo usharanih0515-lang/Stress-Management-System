@@ -1,4 +1,59 @@
 import React, { useState } from 'react';
+import { ArrowRight, Check, Eye, EyeOff, Leaf, LockKeyhole, Mail, UserRound } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import './Auth.css';
+
+const Register = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '', terms: false });
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    setFieldErrors(prev => ({ ...prev, [name]: '' })); setError('');
+  };
+  const validateForm = () => {
+    const nextErrors = {};
+    if (!formData.name.trim()) nextErrors.name = 'Please enter your name.';
+    if (!formData.email) nextErrors.email = 'Email address is required.';
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email)) nextErrors.email = 'Enter a valid email address.';
+    if (!formData.password) nextErrors.password = 'Password is required.';
+    else if (formData.password.length < 6) nextErrors.password = 'Password must be at least 6 characters.';
+    if (!formData.confirmPassword) nextErrors.confirmPassword = 'Please confirm your password.';
+    else if (formData.password !== formData.confirmPassword) nextErrors.confirmPassword = 'Passwords do not match.';
+    if (!formData.terms) nextErrors.terms = 'Please accept the terms to continue.';
+    setFieldErrors(nextErrors); return Object.keys(nextErrors).length === 0;
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault(); setError(''); if (!validateForm()) return; setLoading(true);
+    try { const result = await register(formData.email, formData.password, formData.name); if (result.success) navigate('/dashboard'); else setError(result.error || 'Failed to create account. Please try again.'); }
+    catch (requestError) { setError('Failed to create account. Please try again.'); } finally { setLoading(false); }
+  };
+
+  return (
+    <main className="auth-shell auth-shell-register">
+      <section className="auth-story" aria-label="Wellness introduction"><div className="story-orbit story-orbit-one" /><div className="story-orbit story-orbit-two" /><div className="story-content"><div className="brand-lockup brand-lockup-light"><span className="brand-mark"><Leaf size={19} /></span><span>Hakuna Matata</span></div><div className="story-copy"><p className="eyebrow">Begin with intention</p><h1>Your wellbeing journey starts here.</h1><p>Create a gentle daily rhythm with tools designed to help you pause, reflect, and feel more in control.</p></div><div className="story-points"><div><span><Check size={15} /></span><p>Understand your stress patterns</p></div><div><span><Check size={15} /></span><p>Build restorative habits</p></div><div><span><Check size={15} /></span><p>Make space for what matters</p></div></div></div><div className="story-footer"><span /> A little care, every day</div></section>
+      <section className="auth-panel"><div className="auth-card register-card"><div className="brand-lockup brand-lockup-dark"><span className="brand-mark"><Leaf size={18} /></span><span>Hakuna Matata</span></div><div className="auth-heading"><p className="eyebrow">Make room for wellbeing</p><h2>Create Your Account</h2><p>Start your journey toward better stress management.</p></div>
+        <form className="auth-form register-form" onSubmit={handleSubmit} noValidate>{error && <div className="form-alert" role="alert">{error}</div>}
+          <div className="field-group"><label htmlFor="name">Name</label><div className={`input-wrap ${fieldErrors.name ? 'has-error' : ''}`}><UserRound className="input-icon" size={19} /><input id="name" name="name" type="text" autoComplete="name" value={formData.name} onChange={handleChange} placeholder="Enter your name" aria-invalid={Boolean(fieldErrors.name)} /></div>{fieldErrors.name && <p className="field-error">{fieldErrors.name}</p>}</div>
+          <div className="field-group"><label htmlFor="email">Email Address</label><div className={`input-wrap ${fieldErrors.email ? 'has-error' : ''}`}><Mail className="input-icon" size={19} /><input id="email" name="email" type="email" autoComplete="email" value={formData.email} onChange={handleChange} placeholder="Enter your email address" aria-invalid={Boolean(fieldErrors.email)} /></div>{fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}</div>
+          <div className="field-group"><label htmlFor="password">Password</label><div className={`input-wrap ${fieldErrors.password ? 'has-error' : ''}`}><LockKeyhole className="input-icon" size={19} /><input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={formData.password} onChange={handleChange} placeholder="Create a password" aria-invalid={Boolean(fieldErrors.password)} /><button type="button" className="icon-button" onClick={() => setShowPassword(prev => !prev)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>{fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}</div>
+          <div className="field-group"><label htmlFor="confirmPassword">Confirm Password</label><div className={`input-wrap ${fieldErrors.confirmPassword ? 'has-error' : ''}`}><LockKeyhole className="input-icon" size={19} /><input id="confirmPassword" name="confirmPassword" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={formData.confirmPassword} onChange={handleChange} placeholder="Confirm your password" aria-invalid={Boolean(fieldErrors.confirmPassword)} /></div>{fieldErrors.confirmPassword && <p className="field-error">{fieldErrors.confirmPassword}</p>}</div>
+          <div className="terms-row"><input id="terms" name="terms" type="checkbox" checked={formData.terms} onChange={handleChange} aria-invalid={Boolean(fieldErrors.terms)} /><label htmlFor="terms">I agree to the <a href="#terms">Terms and Conditions</a></label></div>{fieldErrors.terms && <p className="field-error terms-error">{fieldErrors.terms}</p>}
+          <button type="submit" disabled={loading} className="primary-auth-button">{loading ? 'Creating Account...' : 'Create Account'}{!loading && <ArrowRight size={18} />}</button>
+        </form><p className="auth-switch">Already have an account? <Link to="/login" className="text-link">Sign in</Link></p>
+      </div></section>
+    </main>
+  );
+};
+export default Register;
+/* import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -65,7 +120,6 @@ const Register = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* Header */}
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-heading font-bold text-gray-900">
             Create your account
@@ -78,7 +132,6 @@ const Register = () => {
           </p>
         </div>
 
-        {/* Register Form */}
         <form className="mt-8 space-y-6 bg-white p-8 rounded-2xl shadow-lg" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
@@ -86,7 +139,6 @@ const Register = () => {
             </div>
           )}
 
-          {/* Name Input */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
               Full Name
@@ -103,7 +155,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Email Input */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email Address
@@ -120,7 +171,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Password Input */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
@@ -146,7 +196,6 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Confirm Password Input */}
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
               Confirm Password
@@ -163,7 +212,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Terms Agreement */}
           <div className="flex items-center">
             <input
               id="terms"
@@ -180,7 +228,6 @@ const Register = () => {
             </label>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
@@ -201,4 +248,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Register; */

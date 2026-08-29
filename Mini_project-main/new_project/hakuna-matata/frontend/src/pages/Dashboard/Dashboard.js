@@ -128,7 +128,10 @@ const Dashboard = () => {
                   <div className="font-medium text-blue-700 text-xs sm:text-sm">Stress Check</div>
                 </button>
                 
-                <button className="bg-green-50 hover:bg-green-100 p-3 sm:p-4 rounded-lg text-center transition-colors active:scale-95">
+                <button 
+                  onClick={() => navigate('/breathing')}
+                  className="bg-green-50 hover:bg-green-100 p-3 sm:p-4 rounded-lg text-center transition-colors active:scale-95"
+                >
                   <div className="text-xl sm:text-2xl mb-2">🧘</div>
                   <div className="font-medium text-green-700 text-xs sm:text-sm">Breathing</div>
                 </button>

@@ -73,7 +73,6 @@ const [messages, setMessages] = useState([
   }
 ]);
 
-
 // Context-aware responses for keywords
 const getContextualResponse = (userMessage) => {
   // Maps patterns to predefined responses

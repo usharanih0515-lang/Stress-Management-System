@@ -9,6 +9,7 @@
 4. ✅ `frontend/src/pages/Dashboard/Dashboard.js` - **FIXED BUTTON**
 5. ✅ `frontend/package.json` - **ADDED PROXY**
 
+
 ### Backend Files (1)
 6. ✅ `backend/routes/chatbot.js` - **MAJOR UPDATE**
 
